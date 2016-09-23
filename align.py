@@ -5,7 +5,7 @@ def read_fasta_file(file_name):
     with open(file_name, 'r') as fasta_file:
         for line in fasta_file:
             if line[0] != ">":
-                res = line.strip("\r")
+                res = line.replace("\n", "").replace("\r", "")
                 sequence_string += res
     return sequence_string
 
@@ -13,10 +13,9 @@ def read_substitution_matrix_file(file_name):
     matrix = {}
     with open(file_name, 'r') as subs:
         for i, line in enumerate(subs):
-            res = line.replace("\n", "")
-            res_arr = res.split("\t")
+            res_arr = line.split()
             if i == 0:
-                for j in range(1, 5):
+                for j in range(0, 4):
                     matrix[res_arr[j]] = {}
             else:
                 matrix[res_arr[0]]['A'] = int(res_arr[1])
@@ -58,18 +57,18 @@ def fill_matrix(seq1, seq2, sub_matrix, gap):
             matrix[i][j] = max([diag, top, left])
     return matrix
 
-def print_aligned_sequences(seq1, seq2, solved_matrix, sub_matric, gap):
+def print_aligned_sequences(seq1, seq2, solved_matrix, sub_matrix, gap):
     as1 = ""
     as2 = ""
     i = len(seq1)
     j = len(seq2)
     while(i > 0 and j > 0):
-        if seq1[i-1] == seq2[j-1] and solved_matrix[i][j] == solved_matrix[i+1][j+1] - (sub_matrix[seq1[i-2]][seq2[j-2]]):
+        if seq1[i-1] == seq2[j-1] and solved_matrix[i][j] == solved_matrix[i+1][j+1] - (sub_matrix[seq1[i-1]][seq2[j-1]]):
             as1 = seq1[i - 1] + as1
             as2 = seq2[j -1] + as2
             i -= 1
             j -= 1
-        elif seq1[i-1] != seq2[j-1] and solved_matrix[i][j] == solved_matrix[i+1][j+1] - (sub_matrix[seq1[i-2]][seq2[j-2]]):
+        elif seq1[i-1] != seq2[j-1] and solved_matrix[i][j] == solved_matrix[i+1][j+1] - (sub_matrix[seq1[i-1]][seq2[j-1]]):
             as1 = seq1[i - 1] + as1
             as2 = seq2[j -1] + as2
             i -= 1
@@ -119,8 +118,6 @@ def main():
         sub_matrix = read_substitution_matrix_file(sys.argv[3]) 
         seq1 = read_fasta_file(sys.argv[1])
         seq2 = read_fasta_file(sys.argv[2])
-        print(seq1)
-        print(seq2)
         matrix = fill_matrix(seq1, seq2, sub_matrix, int(sys.argv[4]))
         print_aligned_sequences(seq1, seq2, matrix, sub_matrix, int(sys.argv[4]))
 
