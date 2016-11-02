@@ -7,11 +7,8 @@ def create_sequences(count, length):
     """ Creates `count` sequences of `length` each. Returns an array of length `count`"""
     seqs = []
     for i in range(count):
-        seq = ""
-        for j in range(length):
-            seq += random.choice(nucleotides)
-        seqs.append(seq)
-
+        seq = [random.choice(nucleotides) for j in range(length)]
+	seqs.append("".join(seq))
     return seqs
 
 def main():
@@ -19,14 +16,12 @@ def main():
         print "You must provide four numbers for the benchmark"
         return
 
-    icpc = int(sys.argv[1])
+    icpc = float(sys.argv[1])
     ml = int(sys.argv[2])
     sl = int(sys.argv[3])
     sc = int(sys.argv[4])
 
     sequences = create_sequences(sc, sl)
-    print (sequences)
-
 
 if __name__ == "__main__":
     main()
