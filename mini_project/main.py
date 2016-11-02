@@ -1,14 +1,25 @@
 import random
 import sys
+import math 
+from numpy.random import choice
 
 nucleotides = ["A", "T", "C", "G"]
+
+def create_binding_sites(sequence_count, motif_matrix):
+    binding_sites = []
+    for i in range(sequence_count):
+        seq = []
+        for j in range(len(motif_matrix[0])):
+             seq.append(choice(nucleotides, p=[motif_matrix[k][j] for k in range(len(motif_matrix))]))
+        binding_sites.append("".join(seq))
+    return binding_sites
 
 def create_random_motif(icpc, length):
     """ Creates a 4 x `length` matrix, where the sum of each column of the matrix is `icpc` """
     motif = [[0 for cols in range(length)] for rows in range(4)]
     for i in range(4):
         for j in range(length):
-            motif[i][j] = random.uniform(0, (icpc - sum(row[i] for row in motif)))
+            motif[i][j] = random.uniform(0, (icpc - sum(row[j] for row in motif)))
 
     return motif
 
@@ -32,6 +43,8 @@ def main():
 
     sequences = create_sequences(sc, sl)
     motif = create_random_motif(icpc, ml)
+    binding_sites = create_binding_sites(sc, motif)
+    print(binding_sites)
     
 if __name__ == "__main__":
     main()
