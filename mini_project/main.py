@@ -26,6 +26,14 @@ def create_random_motif(icpc, length):
 
     return motif
 
+def plant_site(seqs, sites):
+    """ Over-rides a substring from each sequence in `seqs` with a seq from `sites` """
+    new_seqs = []
+    for i in range(len(seqs)):
+        idx = random.randint(0, len(seq) - len(site) - 1)
+        new_seqs.append(seq[:idx] + site + seq[idx+1:])
+    return new_seqs
+
 def create_sequences(count, length):
     """ Creates `count` sequences of `length` each. Returns an array of length `count`"""
     seqs = []
@@ -47,6 +55,10 @@ def main():
     sequences = create_sequences(sc, sl)
     motif = create_random_motif(icpc, ml)
     binding_sites = create_binding_sites(sc, motif)
+    new_seqs = plant_site(sequences, binding_sites)
+
+    print (sequences)
+    print (new_seqs)
 
 if __name__ == "__main__":
     main()
