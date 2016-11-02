@@ -15,7 +15,7 @@ def create_sequences(count, length):
     return seqs
 
 def main():
-    if len(sys.argv) < 4:
+    if len(sys.argv) <= 4:
         print "You must provide four numbers for the benchmark"
         return
 
