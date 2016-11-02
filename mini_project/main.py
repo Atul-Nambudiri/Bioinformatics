@@ -1,6 +1,6 @@
 import random
 import sys
-import math 
+import math
 from numpy.random import choice
 
 nucleotides = ["A", "T", "C", "G"]
@@ -19,7 +19,10 @@ def create_random_motif(icpc, length):
     motif = [[0 for cols in range(length)] for rows in range(4)]
     for i in range(4):
         for j in range(length):
-            motif[i][j] = random.uniform(0, (icpc - sum(row[j] for row in motif)))
+            if i == 3:
+                motif[i][j] = icpc - sum(row[j] for row in motif)
+            else:
+                motif[i][j] = random.uniform(0, (icpc - sum(row[j] for row in motif)))
 
     return motif
 
@@ -43,8 +46,14 @@ def main():
 
     sequences = create_sequences(sc, sl)
     motif = create_random_motif(icpc, ml)
+<<<<<<< HEAD
     binding_sites = create_binding_sites(sc, motif)
     print(binding_sites)
-    
+
+=======
+
+    print (motif)
+
+>>>>>>> 4ae6a05... Fix summation error
 if __name__ == "__main__":
     main()
