@@ -1,12 +1,45 @@
 import random
 import sys
 import math
+import numpy as np
+
 from numpy.random import choice
 
 nucleotides = ["A", "T", "C", "G"]
 
+def output_motif(motif, ml, idx):
+    """
+    Writes the motif matrix out to motif.txt given the specific format
+    The `idx` parameter is to be used when creating the benchmark datasets
+    """
+    rows = len(motif)
+    cols = len(motif[0])
+    with open("motif.txt", "w+") as output_file:
+        output_file.write(">MOTIF" + str(idx) + "\t" + str(ml))
+        for i in range(rows):
+            output_file.write("\n")
+            for j in range(cols):
+                output_file.write(str(motif[i][j]) + "\t")
+        output_file.write("\n<")
+
+def unnormalize_motif(motif, sc):
+    """ Returns the unnormalized matrix motif """
+    rows = len(motif)
+    cols = len(motif[0])
+    new_mat = [[0 for i in range(cols)] for j in range(rows)]
+    for i in range(rows):
+        for j in range(cols):
+            new_mat[i][j] = int(round(motif[i][j] * sc))
+
+    return new_mat
+
+def output_motif_length(ml):
+    """ Outputs the motif length `ml` to a file motiflength.txt """
+    with open("motiflength.txt", "w+") as output_file:
+        output_file.write(str(ml) + "\n")
+
 def output_plant_sites(plant_sites):
-    """ Outputs the `plant_sites` array to sites.txt, one site per line """ 
+    """ Outputs the `plant_sites` array to sites.txt, one site per line """
     with open("sites.txt", "w+") as output_file:
         output_file.write("\n".join(str(i) for i in plant_sites))
 
@@ -70,16 +103,13 @@ def main():
     binding_sites = create_binding_sites(sc, motif, ml)
     new_seqs, plant_sites = plant_site(sequences, binding_sites)
 
-    print(sequences)
-    print(binding_sites)
-    print(new_seqs)
-    print(plant_sites)
+    # Transpose according to grading rubric
+    unnormalized_motif = np.transpose(unnormalize_motif(motif, sc))
 
     output_sequences(new_seqs)
     output_plant_sites(plant_sites)
-
-
-
+    output_motif(unnormalized_motif, ml, 1)
+    output_motif_length(ml)
 
 if __name__ == "__main__":
     main()
