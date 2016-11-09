@@ -2,10 +2,13 @@ import random
 import sys
 import math
 import numpy as np
+import os
 
 from numpy.random import choice
 
 nucleotides = ["A", "T", "C", "G"]
+
+set_count = 1
 
 def output_motif(motif, ml, idx):
     """
@@ -48,13 +51,13 @@ def output_sequences(sequences):
     with open("sequences.fa", "w+") as output_file:
         output_file.write(">" + "\n>".join(sequences))
 
-def create_binding_sites(sequence_count, motif_matrix, length):
+def create_binding_sites(sequence_count, motif_matrix, length, icpc):
     """ Create `sequence_count` `binding-sites` of length `length`, by sampling the `motif-matrix` """
     binding_sites = []
     for i in range(sequence_count):
         seq = []
         for j in range(length):
-             seq.append(choice(nucleotides, p=[motif_matrix[k][j] for k in range(len(motif_matrix))]))
+             seq.append(choice(nucleotides, p=[motif_matrix[k][j]/icpc for k in range(len(motif_matrix))]))
         binding_sites.append("".join(seq))
     return binding_sites
 
@@ -88,19 +91,50 @@ def create_sequences(count, length):
 	seqs.append("".join(seq))
     return seqs
 
-def main():
-    if len(sys.argv) <= 4:
-        print "You must provide four numbers for the benchmark"
-        return
+def create_benchmark_data():
+    """ Creates the 70 benchmark data sets to be used by the motif finder later """
+    default_icpc = 2
+    default_ml = 8
+    default_sc = 10
 
-    icpc = float(sys.argv[1])
-    ml = int(sys.argv[2])
-    sl = int(sys.argv[3])
-    sc = int(sys.argv[4])
+    icpc_vals = [1, 1.5]
+    motif_lengths = [6, 7]
+    sequence_counts = [5, 20]
 
+    benchmark_helper(default_icpc, default_ml, default_sc)
+
+    for icpc in icpc_vals:
+        benchmark_helper(icpc, default_ml, default_sc)
+
+    for ml in motif_lengths:
+        benchmark_helper(default_icpc, ml, default_sc)
+
+    for sc in sequence_counts:
+        benchmark_helper(default_icpc, default_ml, sc)
+
+def create_set_dir(set_count):
+    """ Creates a new folder and moves cwd by cd-ing into the new folder """
+    set_path = "data/set" + str(set_count)
+    os.makedirs(set_path)
+    os.chdir(set_path)
+
+def benchmark_helper(icpc, ml, sc):
+    cur_path = os.getcwd()
+    global set_count
+
+    for i in range(10):
+        os.chdir(cur_path)
+        print (os.getcwd())
+        create_set_dir(set_count)
+        output_benchmarks(icpc, ml, sc, i)
+        set_count = set_count + 1
+
+    os.chdir(cur_path)
+
+def output_benchmarks(icpc, ml, sc, idx, sl=500):
     sequences = create_sequences(sc, sl)
     motif = create_random_motif(icpc, ml)
-    binding_sites = create_binding_sites(sc, motif, ml)
+    binding_sites = create_binding_sites(sc, motif, ml, icpc)
     new_seqs, plant_sites = plant_site(sequences, binding_sites)
 
     # Transpose according to grading rubric
@@ -108,8 +142,16 @@ def main():
 
     output_sequences(new_seqs)
     output_plant_sites(plant_sites)
-    output_motif(unnormalized_motif, ml, 1)
+    output_motif(unnormalized_motif, ml, idx)
     output_motif_length(ml)
+
+def main():
+    if not os.path.exists("data"):
+        os.makedirs("data")
+        create_benchmark_data()
+    else:
+        print "Exiting the program. Data benchmarks have already been generated"
+        return
 
 if __name__ == "__main__":
     main()
