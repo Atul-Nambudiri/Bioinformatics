@@ -49,7 +49,7 @@ def output_plant_sites(plant_sites):
 def output_sequences(sequences):
     """ Prints the `sequences` out to "sequences.fa", in FASTA Format """
     with open("sequences.fa", "w+") as output_file:
-        output_file.write(">" + "\n>".join(sequences))
+        output_file.write(">" + "\n>".join(sequences) + "\n")
 
 def create_binding_sites(sequence_count, motif_matrix, length, icpc):
     """ Create `sequence_count` `binding-sites` of length `length`, by sampling the `motif-matrix` """
