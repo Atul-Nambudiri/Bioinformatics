@@ -78,7 +78,7 @@ def plant_site(seqs, sites):
     new_seqs = []
     plant_sites = []
     for i in range(len(seqs)):
-        idx = random.randint(0, len(seqs[i]) - len(sites[i]) - 1)
+        idx = random.randint(0, len(seqs[i]) - len(sites[i]))
         new_seqs.append(seqs[i][:idx] + sites[i] + seqs[i][idx+len(sites[i]):])
         plant_sites.append(idx)
     return new_seqs, plant_sites
@@ -122,7 +122,7 @@ def benchmark_helper(icpc, ml, sc):
     cur_path = os.getcwd()
     global set_count
 
-    for i in range(10):
+    for i in range(1, 11):
         os.chdir(cur_path)
         print (os.getcwd())
         create_set_dir(set_count)
