@@ -124,7 +124,6 @@ def benchmark_helper(icpc, ml, sc):
 
     for i in range(1, 11):
         os.chdir(cur_path)
-        print (os.getcwd())
         create_set_dir(set_count)
         output_benchmarks(icpc, ml, sc, i)
         set_count = set_count + 1
