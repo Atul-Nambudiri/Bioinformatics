@@ -4,12 +4,20 @@ import math
 import numpy as np
 import os
 import copy
+import timeit
 
 from numpy.random import choice
 
 nucleotides = {"A" : 0, "T" : 1, "C" : 2, "G" : 3}
 
 set_count = 1
+
+def output_elapsed_time(elapsed):
+    """
+    Output the elapsed time
+    """
+    with open("elapsed_time.txt", "w+") as output_file:
+        output_file.write(str(elapsed))
 
 def output_predicted_motif(motif, ml):
     """
@@ -109,13 +117,16 @@ def find_motifs(icpc):
     ml = read_motif_length()
     sequences = read_sequences()
 
+    start_time = timeit.default_timer()
     motif, plant_sites = create_motif(sequences, ml, icpc)
-    
+
     # Transpose according to grading rubric
     motif = np.transpose(unnormalize_motif(motif, len(sequences)))
+    elapsed = timeit.default_timer() - start_time
     output_predicted_plant_sites(plant_sites)
     output_predicted_motif(motif, ml)
-    
+    output_elapsed_time(elapsed)
+
     os.chdir(base_path)
     set_count += 1
 
