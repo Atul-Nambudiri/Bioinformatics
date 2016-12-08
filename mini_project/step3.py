@@ -9,22 +9,25 @@ This file contains all of the evaluation logic for the final project
 def compute_overlapping_sites(predicted, actual):
     overlap = 0
     for site in predicted:
-        if site in acutal:
+        if site in actual:
             overlap += 1
     return overlap
 
 def compute_overlapping_pos(predicted, actual, ml):
+    p = []
+    a = []
+
     for site in predicted:
         for pos in range(site+1, site+ml+1):
-            predicted.append(pos)
+            p.append(pos)
 
     for site in actual:
         for pos in range(site+1, site+ml+1):
-            actual.append(pos)
+            a.append(pos)
 
     overlap = 0
-    for pos in predicted:
-        if pos in actual:
+    for pos in p:
+        if pos in a:
             overlap +=1
     return overlap
 
@@ -45,7 +48,7 @@ def get_path(folder, f):
     return "/".join([folder, f])
 
 def main():
-    set_string = "set"
+    set_string = "data/set"
 
     motif_file = "motif.txt"
     predicted_motif_file = "predictedmotif.txt"
@@ -56,7 +59,7 @@ def main():
     predicted_sites_file = "predictedsites.txt"
 
     for i in range(1, 71):
-        path = set_string+=str(i)
+        path = set_string + str(i)
 
         ml = parse_ml(get_path(path, ml_file))
         sites = parse_sites(get_path(path, sites_file))
