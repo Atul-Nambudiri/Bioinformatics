@@ -70,7 +70,7 @@ def calculate_position_relative_entropy(actual_position, predicted_position):
     for i in xrange(len(actual_position)):
         actual_normalized = actual_position[i]/actual_positon_total_score
         predicted_normalized = predicted_position[i]/predicted_position_total_score
-        entropy += (actual_normalized * log(actual_normalized/predicted_normalized, 2))
+        entropy += (predicted_normalized * log(predicted_normalized/actual_normalized, 2))
     return entropy
 
 def calculate_relative_entropy(actual_motif, predicted_motif):
