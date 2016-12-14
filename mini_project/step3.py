@@ -1,6 +1,9 @@
 import sys
 import os
 from math import log
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
 
 set_count = 1
 
@@ -104,6 +107,15 @@ def benchmark_helper(icpc, ml, sc):
     overlap_sites = compute_overlapping_sites(p_sites, sites)
     overlap_pos = compute_overlapping_pos(p_sites, sites, ml)
 
+    with open("entropy.txt", "w+") as output_file:
+        output_file.write(str(entropy))
+
+    with open("overlap_pos.txt", "w+") as output_file:
+        output_file.write(str(overlap_pos))
+
+    with open("overlap_sites.txt", "w+") as output_file:
+        output_file.write(str(overlap_sites))
+
     print "======== DATA FOR SET%d =========" % set_count
     print("Entropy: %f:" % entropy)
     print("Number of positional overlaps: %d" % overlap_pos)
@@ -112,6 +124,94 @@ def benchmark_helper(icpc, ml, sc):
 
     os.chdir(base_path)
     set_count += 1
+
+def elapsed_time_graph():
+    with PdfPages('elapsed_time_graph.pdf') as pdf:
+        os.chdir("data")
+        dict = {}
+        sets = []
+        times = []
+        for i in range(1,71):
+            os.chdir("set%d" % i)
+            file = open("elapsed_time.txt")
+            s = file.read()
+            sets.append(i)
+            times.append(s)
+            file.close()
+            os.chdir("..")
+        os.chdir("..")
+        plt.plot(sets,times)
+        plt.xlabel("Sets")
+        plt.ylabel("Elapsed Time")
+        plt.title("Elapsed Time vs. Sets")
+        pdf.savefig()
+        plt.close()
+
+def entropy_graph():
+    with PdfPages('entropy_graph.pdf') as pdf:
+        os.chdir("data")
+        dict = {}
+        sets = []
+        entropies = []
+        for i in range(1,71):
+            os.chdir("set%d" % i)
+            file = open("entropy.txt")
+            s = file.read()
+            sets.append(i)
+            entropies.append(s)
+            file.close()
+            os.chdir("..")
+        os.chdir("..")
+        plt.plot(sets,entropies)
+        plt.xlabel("Sets")
+        plt.ylabel("Entropy")
+        plt.title("Entropy vs. Sets")
+        pdf.savefig()
+        plt.close()
+
+def position_overlap_graph():
+    with PdfPages('position_overlap_graph.pdf') as pdf:
+        os.chdir("data")
+        dict = {}
+        sets = []
+        pos = []
+        for i in range(1,71):
+            os.chdir("set%d" % i)
+            file = open("overlap_pos.txt")
+            s = file.read()
+            sets.append(i)
+            pos.append(s)
+            file.close()
+            os.chdir("..")
+        os.chdir("..")
+        plt.plot(sets,pos)
+        plt.xlabel("Sets")
+        plt.ylabel("Position Overlap")
+        plt.title("Position Overlap vs. Sets")
+        pdf.savefig()
+        plt.close()
+
+def overlap_site_graph():
+    with PdfPages('overlap_site_graph.pdf') as pdf:
+        os.chdir("data")
+        dict = {}
+        sets = []
+        overlap = []
+        for i in range(1,71):
+            os.chdir("set%d" % i)
+            file = open("overlap_sites.txt")
+            s = file.read()
+            sets.append(i)
+            overlap.append(s)
+            file.close()
+            os.chdir("..")
+        os.chdir("..")
+        plt.plot(sets,overlap)
+        plt.xlabel("Sets")
+        plt.ylabel("Overlap Site")
+        plt.title("Overlap Site vs. Sets")
+        pdf.savefig()
+        plt.close()
 
 def main():
     if not os.path.exists("data"):
@@ -140,6 +240,11 @@ def main():
         for sc in sequence_counts:
             for i in range(1, 11):
                 benchmark_helper(default_icpc, default_ml, sc)
+
+        elapsed_time_graph()
+        entropy_graph()
+        position_overlap_graph()
+        overlap_site_graph()
 
 if __name__ == "__main__":
     main()
