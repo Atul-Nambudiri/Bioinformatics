@@ -116,11 +116,11 @@ def benchmark_helper(icpc, ml, sc):
     with open("overlap_sites.txt", "w+") as output_file:
         output_file.write(str(overlap_sites))
 
-    print "======== DATA FOR SET%d =========" % set_count
-    print("Entropy: %f:" % entropy)
-    print("Number of positional overlaps: %d" % overlap_pos)
-    print("Number of site overlaps: %d" % overlap_sites)
-    print ""
+    #print "======== DATA FOR SET%d =========" % set_count
+    #print("Entropy: %f:" % entropy)
+    #print("Number of positional overlaps: %d" % overlap_pos)
+    #print("Number of site overlaps: %d" % overlap_sites)
+    #print ""
 
     os.chdir(base_path)
     set_count += 1
