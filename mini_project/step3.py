@@ -6,7 +6,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 set_count = 1
-entropies = [] # store the entropies
 
 """
 This file contains all of the evaluation logic for the final project
@@ -108,8 +107,6 @@ def benchmark_helper(icpc, ml, sc):
     overlap_sites = compute_overlapping_sites(p_sites, sites)
     overlap_pos = compute_overlapping_pos(p_sites, sites, ml)
 
-    entropies.append(entropy)
-
     with open("entropy.txt", "w+") as output_file:
         output_file.write(str(entropy))
 
@@ -145,8 +142,8 @@ def elapsed_time_graph(parameter, parameter_values, sets):
         averages.append(sum(times[0:10])/10)
         averages.append(sum(times[10:20])/10)
         averages.append(sum(times[20:30])/10)
-        print(parameter_values)
-        print(averages)
+        # print(parameter_values)
+        # print(averages)
         plt.plot(parameter_values,averages, "ro")
         plt.xlabel("%s values" % parameter)
         plt.ylabel("Elapsed Time")
@@ -154,69 +151,81 @@ def elapsed_time_graph(parameter, parameter_values, sets):
         pdf.savefig()
         plt.close()
 
-def entropy_graph():
-    with PdfPages('entropy_graph.pdf') as pdf:
+def entropy_graph(parameter, parameter_values, sets):
+    with PdfPages('entropy_graph_%s.pdf' % parameter) as pdf:
         os.chdir("data")
         dict = {}
-        sets = []
         entropies = []
-        for i in range(1,71):
+        for i in sets:
             os.chdir("set%d" % i)
             file = open("entropy.txt")
             s = file.read()
-            sets.append(i)
-            entropies.append(s)
+            entropies.append(float(s))
             file.close()
             os.chdir("..")
         os.chdir("..")
-        plt.plot(sets,entropies, "ro")
-        plt.xlabel("Sets")
+        averages = []
+        averages.append(sum(entropies[0:10])/10)
+        averages.append(sum(entropies[10:20])/10)
+        averages.append(sum(entropies[20:30])/10)
+        # print(parameter_values)
+        # print(averages)
+        plt.plot(parameter_values,averages, "ro")
+        plt.xlabel("%s values" % parameter)
         plt.ylabel("Entropy")
-        plt.title("Entropy vs. Sets")
+        plt.title("Entropy vs. %s" % parameter)
         pdf.savefig()
         plt.close()
 
-def position_overlap_graph():
-    with PdfPages('position_overlap_graph.pdf') as pdf:
+def position_overlap_graph(parameter, parameter_values, sets):
+    with PdfPages('position_overlap_graph_%s.pdf' % parameter) as pdf:
         os.chdir("data")
         dict = {}
-        sets = []
-        pos = []
-        for i in range(1,71):
+        pos_overlaps = []
+        for i in sets:
             os.chdir("set%d" % i)
             file = open("overlap_pos.txt")
             s = file.read()
-            sets.append(i)
-            pos.append(s)
+            pos_overlaps.append(float(s))
             file.close()
             os.chdir("..")
         os.chdir("..")
-        plt.plot(sets,pos, "ro")
-        plt.xlabel("Sets")
-        plt.ylabel("Position Overlap")
-        plt.title("Position Overlap vs. Sets")
+        averages = []
+        averages.append(sum(pos_overlaps[0:10])/10)
+        averages.append(sum(pos_overlaps[10:20])/10)
+        averages.append(sum(pos_overlaps[20:30])/10)
+        # print(parameter_values)
+        # print(averages)
+        plt.plot(parameter_values,averages, "ro")
+        plt.xlabel("%s values" % parameter)
+        plt.ylabel("Position Overlaps")
+        plt.title("Position Overlap vs. %s" % parameter)
         pdf.savefig()
         plt.close()
 
-def overlap_site_graph():
-    with PdfPages('overlap_site_graph.pdf') as pdf:
+def overlap_site_graph(parameter, parameter_values, sets):
+    with PdfPages('overlap_site_graph_%s.pdf' % parameter) as pdf:
         os.chdir("data")
         dict = {}
-        sets = []
-        overlap = []
-        for i in range(1,71):
+        over_sites = []
+        for i in sets:
             os.chdir("set%d" % i)
             file = open("overlap_sites.txt")
             s = file.read()
-            sets.append(i)
-            overlap.append(s)
+            over_sites.append(float(s))
             file.close()
             os.chdir("..")
         os.chdir("..")
-        plt.plot(sets,overlap, "ro")
-        plt.xlabel("Sets")
-        plt.ylabel("Overlap Site")
-        plt.title("Overlap Site vs. Sets")
+        averages = []
+        averages.append(sum(over_sites[0:10])/10)
+        averages.append(sum(over_sites[10:20])/10)
+        averages.append(sum(over_sites[20:30])/10)
+        # print(parameter_values)
+        # print(averages)
+        plt.plot(parameter_values,averages, "ro")
+        plt.xlabel("%s values" % parameter)
+        plt.ylabel("Overlap Sites")
+        plt.title("Overlap Site vs. %s" % parameter)
         pdf.savefig()
         plt.close()
 
@@ -243,9 +252,9 @@ def main():
 
         sets = list(range(1, 11)) + list(range(range_start, set_count))
         elapsed_time_graph("ICPC", [default_icpc] + icpc_vals, sets)
-        #entropy_graph()
-        #position_overlap_graph()
-        #overlap_site_graph()
+        entropy_graph("ICPC", [default_icpc] + icpc_vals, sets)
+        position_overlap_graph("ICPC", [default_icpc] + icpc_vals, sets)
+        overlap_site_graph("ICPC", [default_icpc] + icpc_vals, sets)
 
         range_start = set_count
         for ml in motif_lengths:
@@ -254,9 +263,9 @@ def main():
 
         sets = list(range(1, 11)) + list(range(range_start, set_count))
         elapsed_time_graph("ML", [default_ml] + motif_lengths, sets)
-        #entropy_graph()
-        #position_overlap_graph()
-        #overlap_site_graph()
+        entropy_graph("ML", [default_ml] + motif_lengths, sets)
+        position_overlap_graph("ML", [default_ml] + motif_lengths, sets)
+        overlap_site_graph("ML", [default_ml] + motif_lengths, sets)
 
         range_start = set_count
         for sc in sequence_counts:
@@ -265,9 +274,9 @@ def main():
 
         sets = list(range(1, 11)) + list(range(range_start, set_count))
         elapsed_time_graph("SC", [default_sc] + sequence_counts, sets)
-        #entropy_graph()
-        #position_overlap_graph()
-        #overlap_site_graph()
+        entropy_graph("SC", [default_sc] + sequence_counts, sets)
+        position_overlap_graph("SC", [default_sc] + sequence_counts, sets)
+        overlap_site_graph("SC", [default_sc] + sequence_counts, sets)
 
 if __name__ == "__main__":
     main()
