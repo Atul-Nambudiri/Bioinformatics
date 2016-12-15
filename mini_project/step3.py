@@ -6,6 +6,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 set_count = 1
+entropies = [] # store the entropies
 
 """
 This file contains all of the evaluation logic for the final project
@@ -106,6 +107,8 @@ def benchmark_helper(icpc, ml, sc):
     entropy = calculate_relative_entropy(actual_motif, predicted_motif)
     overlap_sites = compute_overlapping_sites(p_sites, sites)
     overlap_pos = compute_overlapping_pos(p_sites, sites, ml)
+
+    entropies.append(entropy)
 
     with open("entropy.txt", "w+") as output_file:
         output_file.write(str(entropy))
@@ -228,23 +231,39 @@ def main():
 
         for i in range(1, 11):
             benchmark_helper(default_icpc, default_ml, default_sc)
+        print entropies
+
+        #elapsed_time_graph()
+        #entropy_graph()
+        #position_overlap_graph()
+        #overlap_site_graph()
 
         for icpc in icpc_vals:
             for i in range(1, 11):
                 benchmark_helper(icpc, default_ml, default_sc)
 
+        #elapsed_time_graph()
+        #entropy_graph()
+        #position_overlap_graph()
+        #overlap_site_graph()
+
         for ml in motif_lengths:
             for i in range(1, 11):
                 benchmark_helper(default_icpc, ml, default_sc)
+
+        #elapsed_time_graph()
+        #entropy_graph()
+        #position_overlap_graph()
+        #overlap_site_graph()
 
         for sc in sequence_counts:
             for i in range(1, 11):
                 benchmark_helper(default_icpc, default_ml, sc)
 
-        elapsed_time_graph()
-        entropy_graph()
-        position_overlap_graph()
-        overlap_site_graph()
+        #elapsed_time_graph()
+        #entropy_graph()
+        #position_overlap_graph()
+        #overlap_site_graph()
 
 if __name__ == "__main__":
     main()
