@@ -76,24 +76,23 @@ def create_pwm(sequences, icpc):
         total = sum([row[i] for row in pwm])
         for t in xrange(4):
             pwm[t][i] /= total
-            pwm[t][i] *= icpc
+            # pwm[t][i] *= icpc
     return pwm
 
 def check_score(sequence, pwm):
     score = 0
     for i in xrange(len(sequence)):
-        score += pwm[nucleotides[sequence[i]]][i]
+        score += ((pwm[nucleotides[sequence[i]]][i] + 0.0001)/.25)
     return score
 
 def find_best_location(pwm, sequence, ml):
-    best_score = 0
-    best_pos = None
+    score_list = []
     for i in xrange(len(sequence) - ml + 1):
         score = check_score(sequence[i:i+ml], pwm)
-        if score > best_score:
-            best_pos = i
-            best_score = score
-    return best_pos
+        score_list.append(score)
+    total = sum(score_list)
+    score_list = map(lambda x: x/total, score_list)
+    return np.random.choice(np.arange(0, len(score_list)), p=score_list)
 
 def create_motif(sequences, ml, icpc):
     """Finds motif of length `ml` in `sequences` using Gibbs Motif Sampling"""
@@ -101,11 +100,13 @@ def create_motif(sequences, ml, icpc):
     prev_sites = []
     while(sites != prev_sites):
         prev_sites = copy.deepcopy(sites)
-        for i in xrange(len(prev_sites)):
+        # i = random.randint(0, len(prev_sites) - 1)
+        for i in range(len(prev_sites)):
             part = [sequences[t][sites[t]:sites[t] + ml] for t in xrange(len(sites)) if t != i]    #Get the relevant sections of the sequences for the pwm for all sequence other than i
             pwm = create_pwm(part, icpc)
             best_pos = find_best_location(pwm, sequences[i], ml)
             sites[i] = best_pos
+            print(sites)
     return create_pwm([sequences[t][sites[t]:sites[t] + ml] for t in xrange(len(sites))], icpc), sites
 
 def find_motifs(icpc):
@@ -143,20 +144,20 @@ def main():
         motif_lengths = [6, 7]
         sequence_counts = [5, 20]
 
-        for i in range(1, 11):
+        for i in range(1, 2):
             find_motifs(default_icpc)
 
-        for icpc in icpc_vals:
-            for i in range(1, 11):
-                find_motifs(icpc)
+        # for icpc in icpc_vals:
+        #     for i in range(1, 11):
+        #         find_motifs(icpc)
 
-        for ml in motif_lengths:
-            for i in range(1, 11):
-                find_motifs(default_icpc)
+        # for ml in motif_lengths:
+        #     for i in range(1, 11):
+        #         find_motifs(default_icpc)
 
-        for sc in sequence_counts:
-            for i in range(1, 11):
-                find_motifs(default_icpc)
+        # for sc in sequence_counts:
+        #     for i in range(1, 11):
+        #         find_motifs(default_icpc)
 
 if __name__ == "__main__":
     main()
