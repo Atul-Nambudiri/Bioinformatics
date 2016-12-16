@@ -5,12 +5,20 @@ import numpy as np
 import os
 import copy
 import timeit
+import multiprocessing
 
 from numpy.random import choice
 
 nucleotides = {"A" : 0, "T" : 1, "C" : 2, "G" : 3}
 
 set_count = 1
+
+def calculate_information_content(pwm):
+    ic = 0
+    for j in xrange(len(pwm[0])):
+        for i in range(len(pwm)):
+            ic += pwm[i][j] * math.log(((pwm[i][j]+.00001)/.25), 2)
+    return ic 
 
 def output_elapsed_time(elapsed):
     """
@@ -76,13 +84,13 @@ def create_pwm(sequences, icpc):
         total = sum([row[i] for row in pwm])
         for t in xrange(4):
             pwm[t][i] /= total
-            # pwm[t][i] *= icpc
+            pwm[t][i] *= icpc
     return pwm
 
 def check_score(sequence, pwm):
     score = 0
     for i in xrange(len(sequence)):
-        score += ((pwm[nucleotides[sequence[i]]][i] + 0.0001)/.25)
+        score += (pwm[nucleotides[sequence[i]]][i] + 0.00001)/.25     # This calculates Qx/Px, which the score
     return score
 
 def find_best_location(pwm, sequence, ml):
@@ -91,27 +99,42 @@ def find_best_location(pwm, sequence, ml):
         score = check_score(sequence[i:i+ml], pwm)
         score_list.append(score)
     total = sum(score_list)
-    score_list = map(lambda x: x/total, score_list)
-    return np.random.choice(np.arange(0, len(score_list)), p=score_list)
+    score_list = map(lambda x: x/total, score_list)     # Convert the score list into a probability distribution by dividing each element by the total
+    x = np.random.choice(np.arange(0, len(score_list)), p=score_list)   # Sample from the probability distribution
+    # max_score = max(score_list)
+    # max_list = [i for i, j in enumerate(score_list) if j == max_score]
+    return x
 
 def create_motif(sequences, ml, icpc):
     """Finds motif of length `ml` in `sequences` using Gibbs Motif Sampling"""
-    sites = [random.randint(0, len(i) - ml) for i in sequences]
-    prev_sites = []
-    while(sites != prev_sites):
-        prev_sites = copy.deepcopy(sites)
-        # i = random.randint(0, len(prev_sites) - 1)
-        for i in range(len(prev_sites)):
+    max_ic = 0
+    current_best_sites = []
+    for x in range(3):     #Go through the process multiple times
+        prev_sites = []
+        sites = [random.randint(0, len(i) - ml) for i in sequences]
+        while(prev_sites != sites):
+            prev_sites = copy.deepcopy(sites)
+            i = random.randint(0, len(prev_sites) - 1)
+            # for i in range(len(prev_sites)):
             part = [sequences[t][sites[t]:sites[t] + ml] for t in xrange(len(sites)) if t != i]    #Get the relevant sections of the sequences for the pwm for all sequence other than i
             pwm = create_pwm(part, icpc)
             best_pos = find_best_location(pwm, sequences[i], ml)
             sites[i] = best_pos
-            print(sites)
-    return create_pwm([sequences[t][sites[t]:sites[t] + ml] for t in xrange(len(sites))], icpc), sites
+            
+            full_motifs = [sequences[t][sites[t]:sites[t] + ml] for t in xrange(len(sites))]
+            full_pwm = create_pwm(full_motifs, icpc)
+            ic = calculate_information_content(full_pwm)
 
-def find_motifs(icpc):
-    global set_count
+            if(ic > max_ic):    #Pick the sites with the Highest ic content according to lecture
+                max_ic = ic
+                current_best_sites = copy.deepcopy(sites)
+    return create_pwm([sequences[t][current_best_sites[t]:current_best_sites[t] + ml] for t in xrange(len(current_best_sites))], icpc), current_best_sites
 
+def find_motifs(items):
+    icpc = items[0]
+    set_count = items[1]
+
+    print("Set: %d" % set_count)
     base_path = os.getcwd()
     os.chdir("data/set%d" % set_count)
 
@@ -129,9 +152,9 @@ def find_motifs(icpc):
     output_elapsed_time(elapsed)
 
     os.chdir(base_path)
-    set_count += 1
 
 def main():
+    global set_count
     if not os.path.exists("data"):
         print "Exiting the program. Data benchmarks have not been generated" 
         return
@@ -144,20 +167,29 @@ def main():
         motif_lengths = [6, 7]
         sequence_counts = [5, 20]
 
-        for i in range(1, 2):
-            find_motifs(default_icpc)
+        args_queue = []
 
-        # for icpc in icpc_vals:
-        #     for i in range(1, 11):
-        #         find_motifs(icpc)
+        for i in range(1, 11):
+            args_queue.append([default_icpc, set_count])
+            set_count += 1
 
-        # for ml in motif_lengths:
-        #     for i in range(1, 11):
-        #         find_motifs(default_icpc)
+        for icpc in icpc_vals:
+            for i in range(1, 11):
+                args_queue.append([icpc, set_count])
+                set_count += 1
 
-        # for sc in sequence_counts:
-        #     for i in range(1, 11):
-        #         find_motifs(default_icpc)
+        for ml in motif_lengths:
+            for i in range(1, 11):
+                args_queue.append([default_icpc, set_count])
+                set_count += 1
 
+        for sc in sequence_counts:
+            for i in range(1, 11):
+                args_queue.append([default_icpc, set_count])
+                set_count += 1
+
+        worker_pool = multiprocessing.Pool(processes=2)
+        worker_pool.map(find_motifs, args_queue)
+        
 if __name__ == "__main__":
     main()

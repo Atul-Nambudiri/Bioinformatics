@@ -88,7 +88,7 @@ def create_sequences(count, length):
     seqs = []
     for i in range(count):
         seq = [random.choice(nucleotides) for j in range(length)]
-	seqs.append("".join(seq))
+        seqs.append("".join(seq))
     return seqs
 
 def create_benchmark_data():
